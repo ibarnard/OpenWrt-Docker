@@ -1,0 +1,36 @@
+services:
+  openwrt:
+    image: zzsrv/openwrt:latest
+    container_name: openwrt
+    restart: always
+    # privileged: true
+    cap_add:
+      - NET_ADMIN # 增加 NET_ADMIN 权限
+      - NET_RAW
+    networks:
+      macvlan_net:
+    command: /sbin/init
+
+networks:
+  macvlan_net:
+    driver: macvlan
+    driver_opts:
+      parent: enp1s0 # 宿主机的网卡名称，需要使用ip link show 手动查询，保持一致
+    ipam:
+      config:
+        - subnet: 192.168.1.0/24 # 定义容器使用的子网，需要和当前网络一致
+          gateway: 192.168.1.1 # 定义网关，需要和当前网络一致
+          
+#---------------------------------------
+# 地址：       
+# 使用办法：         
+# 运行后进入 容器
+# docker exec -it openwrt /bin/bash
+# nano /etc/config/network
+# 修改IP地址和路由器同一网段，网关是路由器地址
+
+# 然后重启网络服务：
+# /etc/init.d/network restart
+# docker container restart openwrt
+
+#然后访问配置的IP地址就可以用了
